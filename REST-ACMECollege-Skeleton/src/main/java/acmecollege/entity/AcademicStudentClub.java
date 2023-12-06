@@ -5,8 +5,8 @@
  * @author Shariar (Shawn) Emami
  * @date August 28, 2022
  * 
- * Updated by:  Group NN
- *   studentId, firstName, lastName (as from ACSIS)
+ * Updated by:  Group #7
+ *   41014924, Salam, Albadawi
  *   studentId, firstName, lastName (as from ACSIS)
  *   studentId, firstName, lastName (as from ACSIS)
  *   studentId, firstName, lastName (as from ACSIS)
