@@ -19,20 +19,46 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;;
+
 @SuppressWarnings("unused")
 
 /**
  * Role class used for (JSR-375) Java EE Security authorization/authentication
  */
-//TODO SR01 - Make this into JPA entity and add all necessary annotations
+// (DONE) TODO SR01 - Make this into JPA entity and add all necessary annotations
+@Entity
+@Table(name = "security_role")
+@Access(AccessType.FIELD)
+@NamedQuery(name = SecurityRole.SECURITY_ROLE_BY_NAME_QUERY, query = "SELECT r FROM SecurityRole r WHERE r.roleName = :param1")
 public class SecurityRole implements Serializable {
     /** Explicit set serialVersionUID */
     private static final long serialVersionUID = 1L;
+    
+    public static final String SECURITY_ROLE_BY_NAME_QUERY = "roleByName";
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "role_id")
     protected int id;
     
+    @JsonInclude(Include.NON_NULL)
+    @Column(name = "name", nullable = false)
     protected String roleName;
     
+    @ManyToMany(mappedBy = "roles")
     protected Set<SecurityUser> users = new HashSet<SecurityUser>();
 
     public SecurityRole() {

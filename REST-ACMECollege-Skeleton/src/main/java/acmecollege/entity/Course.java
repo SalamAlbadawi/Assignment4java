@@ -27,6 +27,7 @@ import javax.persistence.FetchType;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @SuppressWarnings("unused")
 
@@ -34,38 +35,46 @@ import javax.persistence.Table;
  * The persistent class for the course database table.
  */
 @Entity
-@Table(name = "course")
-@NamedQuery(name = Course.ALL_COURSES_QUERY, query = "SELECT c FROM Course c")
+@NamedQuery(name = Course.ALL_COURSES_QUERY, query = "SELECT c FROM Course c LEFT JOIN FETCH c.courseRegistrations")
+@NamedQuery(name = Course.FIND_BY_ID, query = "SELECT c FROM Course c LEFT JOIN FETCH c.courseRegistrations where c.id = :param1")
 @AttributeOverride(name = "id", column = @Column(name = "course_id"))
 public class Course extends PojoBase implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	public static final String ALL_COURSES_QUERY = "Course.findAll";
+	public static final String FIND_BY_ID = "Course.findById";
 
-    public static final String ALL_COURSES_QUERY = "Course.findAll";
-
+	// (DONE) TODO CO03 - Add missing annotations.
 	@Basic(optional = false)
 	@Column(name = "course_code", nullable = false, length = 7)
 	private String courseCode;
 
+	// (DONE) TODO CO04 - Add missing annotations.
 	@Basic(optional = false)
     @Column(name = "course_title", nullable = false, length = 100)
 	private String courseTitle;
 
+	// (DONE) TODO CO05 - Add missing annotations.
 	@Basic(optional = false)
 	@Column(name = "year",  nullable = false)
 	private int year;
 
+	// (DONE) TODO CO06 - Add missing annotations.
 	@Basic(optional = false)
 	@Column(name = "semester",  nullable = false, length = 6)
 	private String semester;
 
+	// (DONE) TODO CO07 - Add missing annotations.
 	@Basic(optional = false)
 	@Column(name = "credit_units",  nullable = false)
 	private int creditUnits;
 
+	// (DONE) TODO CO08 - Add missing annotations.
 	@Basic(optional = false)
 	@Column(name = "online",  nullable = false)
 	private byte online;
 
+	// (DONE) TODO CO09 - Add annotations for 1:M relation.  Changes to this class should not cascade.
 	@OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "course")
 	private Set<CourseRegistration> courseRegistrations = new HashSet<>();
 
@@ -140,7 +149,7 @@ public class Course extends PojoBase implements Serializable {
 	public void setOnline(byte online) {
 		this.online = online;
 	}
-	
+	@JsonIgnore // R
 	public Set<CourseRegistration> getCourseRegistrations() {
 		return courseRegistrations;
 	}

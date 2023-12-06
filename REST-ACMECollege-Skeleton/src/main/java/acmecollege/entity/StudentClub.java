@@ -35,30 +35,38 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * The persistent class for the student_club database table.
  */
+// (DONE) TODO SC01 - Add the missing annotations.
+//(DONE) TODO SC02 - StudentClub has subclasses AcademicStudentClub and NonAcademicStudentClub.  Look at week 9 slides for InheritanceType.
+//(DONE) TODO SC03 - Do we need a mapped super class?  If so, which one?
+//(DONE) TODO SC06 - Add in JSON annotations to indicate different sub-classes of StudentClub
 @Entity
 @Table(name = "student_club")
 @AttributeOverride(name="id", column=@Column(name = "club_id"))
-@NamedQuery(name = StudentClub.ALL_STUDENT_CLUBS_QUERY_NAME, query = "SELECT distinct sc FROM StudentClub sc")
-@NamedQuery(name = StudentClub.SPECIFIC_STUDENT_CLUB_QUERY_NAME, query = "SELECT distinct sc FROM StudentClub sc where sc.id = :param1")
-@NamedQuery(name = StudentClub.IS_DUPLICATE_QUERY_NAME, query = "SELECT count(sc) FROM StudentClub sc where sc.name = :param1")
+@NamedQuery(name = StudentClub.ALL_STUDENT_CLUBS_QUERY_NAME, 
+			query = "SELECT distinct sc FROM StudentClub sc LEFT JOIN FETCH sc.clubMemberships")
+@NamedQuery(name = StudentClub.SPECIFIC_STUDENT_CLUB_QUERY_NAME, 
+			query = "SELECT distinct sc FROM StudentClub sc LEFT JOIN FETCH sc.clubMemberships where sc.id = :param1")
+@NamedQuery(name = StudentClub.IS_DUPLICATE_QUERY_NAME, 
+			query = "SELECT count(sc) FROM StudentClub sc where sc.name = :param1")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(columnDefinition = "bit(1)", name = "academic", discriminatorType = DiscriminatorType.INTEGER)
-//TODO SC06 - Add in JSON annotations to indicate different sub-classes of StudentClub
 public abstract class StudentClub extends PojoBase implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	public static final String ALL_STUDENT_CLUBS_QUERY_NAME = "StudentClub.findAll";
+	public static final String SPECIFIC_STUDENT_CLUB_QUERY_NAME = "StudentClub.findByName";
+	public static final String IS_DUPLICATE_QUERY_NAME = "StudentClub.isDuplicate";
 
-    public static final String ALL_STUDENT_CLUBS_QUERY_NAME = "StudentClub.findAll";
-    public static final String SPECIFIC_STUDENT_CLUB_QUERY_NAME = "StudentClub.findByName";
-    public static final String IS_DUPLICATE_QUERY_NAME = "StudentClub.isDuplicate";
 
+	// (DONE) TODO SC04 - Add the missing annotations.
 	@Basic(optional = false)
 	@Column(name = "name", nullable = false, length = 100)
 	private String name;
 
+	// (DONE) TODO SC05 - Add the 1:M annotation.  This list should be effected by changes to this object (cascade).
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "club", orphanRemoval = true)
 	private Set<ClubMembership> clubMemberships = new HashSet<>();
 

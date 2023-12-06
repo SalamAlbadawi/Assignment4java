@@ -14,11 +14,35 @@
  */
 package acmecollege.entity;
 
+
 import java.io.Serializable;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import acmecollege.rest.serializer.SecurityRoleSerializer;
+
 
 @SuppressWarnings("unused")
 
@@ -26,19 +50,40 @@ import java.util.Set;
  * User class used for (JSR-375) Java EE Security authorization/authentication
  */
 
-//TODO - Make this into JPA entity and add all the necessary annotations
+// (DONE) TODO - Make this into JPA entity and add all the necessary annotations
+@Entity
+@Table(name = "security_user")
+@Access(AccessType.FIELD)
+@NamedQuery(name = SecurityUser.SECURITY_USER_BY_NAME_QUERY, 
+			query = "SELECT u FROM SecurityUser u LEFT JOIN FETCH u.student LEFT JOIN FETCH u.roles WHERE u.username = :param1")
+@NamedQuery(name =SecurityUser.SECURITY_USER_BY_ID_QUERY, 
+			query = "SELECT u FROM SecurityUser u LEFT JOIN FETCH u.student LEFT JOIN FETCH u.roles WHERE u.student.id = :param1")
 public class SecurityUser implements Serializable, Principal {
     /** Explicit set serialVersionUID */
     private static final long serialVersionUID = 1L;
+    
+    public static final String SECURITY_USER_BY_NAME_QUERY = "SecurityUser.userByName";
+    public static final String SECURITY_USER_BY_ID_QUERY = "SecurityUser.userByID";
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     protected int id;
     
+    @Column(name = "username", nullable = false)
     protected String username;
     
+    @Column(name = "password_hash", nullable = false)
     protected String pwHash;
     
+    @OneToOne(optional = true)
+    @JoinColumn(name = "student_id", referencedColumnName = "id")
     protected Student student;
     
+    @ManyToMany(cascade = {CascadeType.PERSIST}, fetch = FetchType.LAZY)
+    @JoinTable(name = "user_has_role", 
+    			joinColumns = @JoinColumn(referencedColumnName = "user_id", name = "user_id"), 
+    			inverseJoinColumns = @JoinColumn(referencedColumnName = "role_id", name = "role_id"))
     protected Set<SecurityRole> roles = new HashSet<SecurityRole>();
 
     public SecurityUser() {
@@ -69,7 +114,9 @@ public class SecurityUser implements Serializable, Principal {
         this.pwHash = pwHash;
     }
 
-    // TODO SU01 - Setup custom JSON serializer
+    // (DONE) TODO SU01 - Setup custom JSON serializer
+    @JsonInclude(Include.NON_NULL)
+    @JsonSerialize(using = SecurityRoleSerializer.class)
     public Set<SecurityRole> getRoles() {
         return roles;
     }

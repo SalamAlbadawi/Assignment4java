@@ -18,7 +18,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.AttributeOverride;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,33 +33,42 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * The persistent class for the student database table.
  */
 @SuppressWarnings("unused")
+// (DONE) TODO ST01 - Add the missing annotations.
 @Entity
 @Table(name = "student")
-@NamedQuery(name = Student.ALL_STUDENTS_QUERY_NAME, query = "SELECT s FROM Student s")
-@NamedQuery(name = Student.QUERY_STUDENT_BY_ID, query = "SELECT s FROM Student s where s.id = :param1")
-//No need for AttributeOverride as student id column is called id as well.
+@NamedQuery(name = Student.ALL_STUDENTS_QUERY_NAME, 
+			query = "SELECT s FROM Student s LEFT JOIN FETCH s.membershipCards LEFT JOIN FETCH s.courseRegistrations")
+@NamedQuery(name = Student.QUERY_STUDENT_BY_ID, 
+			query = "SELECT s FROM Student s LEFT JOIN FETCH s.membershipCards LEFT JOIN FETCH s.courseRegistrations where s.id = :param1")
+// (DONE) TODO ST02 - Do we need a mapped super class? If so, which one?
 public class Student extends PojoBase implements Serializable {
 	private static final long serialVersionUID = 1L;
-
+	
     public static final String ALL_STUDENTS_QUERY_NAME = "Student.findAll";
     public static final String QUERY_STUDENT_BY_ID = "Student.findAllByID";
 
     public Student() {
     	super();
     }
-    
-	@Basic(optional = false)
+
+    // (DONE) TODO ST03 - Add annotation
+    @Basic(optional = false)
     @Column(name = "first_name", nullable = false, length = 50)
 	private String firstName;
 
-	@Basic(optional = false)
+	// (DONE) TODO ST04 - Add annotation
+    @Basic(optional = false)
     @Column(name = "last_name", nullable = false, length = 50)
 	private String lastName;
 
-	@OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "owner")
+	// (DONE) TODO ST05 - Add annotations for 1:M relation.  Changes should not cascade.
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "owner")
+    @JsonIgnore
 	private Set<MembershipCard> membershipCards = new HashSet<>();
 
-	@OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "student")
+	// (DONE) TODO ST06 - Add annotations for 1:M relation.  Changes should not cascade.
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "student")
+    @JsonIgnore
 	private Set<CourseRegistration> courseRegistrations = new HashSet<>();
 
 	public String getFirstName() {
